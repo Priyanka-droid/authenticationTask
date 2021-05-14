@@ -71,7 +71,26 @@ app.get("/secret", auth, (req, res) => {
   console.log(`this is cookie ${req.cookies.jwt}`);
   res.render("secret");
 });
+app.post("/secret", auth, async (req, res) => {
+  try {
+    req.user.messages = req.user.messages.concat({ message: req.message });
+    await req.user.save();
+    res.status(200);
+    res.render("secret");
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+app.get("/secret-page", auth, (req, res) => {
+  req.user.messagesOnly = req.user.messages.map((curr_element) => {
+    return curr_element.message;
+  });
+  req.user.messagesOnly = req.user.messagesOnly.filter((curr_element) => {
+    return curr_element != null;
+  });
 
+  res.send(req.user.messagesOnly);
+});
 app.get("/login", (req, res) => {
   res.render("login");
 });

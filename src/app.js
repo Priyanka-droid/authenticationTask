@@ -81,15 +81,32 @@ app.post("/secret", auth, async (req, res) => {
     res.status(500).send(e);
   }
 });
-app.get("/secret-page", auth, (req, res) => {
-  req.user.messagesOnly = req.user.messages.map((curr_element) => {
-    return curr_element.message;
-  });
-  req.user.messagesOnly = req.user.messagesOnly.filter((curr_element) => {
-    return curr_element != null;
-  });
+app.get("/secret-page", auth, async (req, res) => {
+  const isMatch = await bcrypt.compare("admin", req.user.password);
+  if (req.user.email === "admin@gmail.com" && isMatch) {
+    res.send(req.user);
+  } else {
+    req.user.messagesOnly = req.user.messages.map((curr_element) => {
+      return curr_element.message;
+    });
+    req.user.messagesOnly = req.user.messagesOnly.filter((curr_element) => {
+      return curr_element != null;
+    });
 
-  res.send(req.user.messagesOnly);
+    res.send(req.user.messagesOnly);
+  }
+});
+
+app.get("/admin", auth, async (req, res) => {
+  console.log(`this is cookie ${req.cookies.jwt}`);
+  console.log(req.user.email, req.user.password);
+  const isMatch = await bcrypt.compare("admin", req.user.password);
+  if (req.user.email === "admin@gmail.com" && isMatch) {
+    res.send(req.user);
+  } else {
+    res.render("login");
+  }
+  // res.render("admin");
 });
 app.get("/login", (req, res) => {
   res.render("login");
